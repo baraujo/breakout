@@ -8,50 +8,50 @@ using Random = UnityEngine.Random;
 public class BallController : MonoBehaviour
 {
     public float speed;
+    
+    // Option 1: separated variables
     public float topScreenLimit;
+    public float bottomScreenLimit;
     public float leftScreenLimit;
     public float rightScreenLimit;
-    public float bottomScreenLimit;
+
+    public Vector3 initialPosition;
+    
+    // Option 2: struct
+    /* [System.Serializable]
+    public struct ScreenLimits 
+    {
+        public float top;
+        public float bottom;
+        public float left;
+        public float right;
+    }
+    public ScreenLimits screenLimits; */
 
     private Vector3 m_Direction;
 
     void Start()
     {
         // Choose the initial ball direction
-        ChooseBallDirection();
+        Debug.Log("starting");
+        ResetBallPosition();
     }
 
-    private void ChooseBallDirection()
+    private void ResetBallPosition()
     {
-        // There are four possible directions for the ball to fly,
-        // which are the four diagonals
+        int randomDirection = Random.Range(0, 2);
         
-        // Let's choose one using a random number
-        int randomDirection = Random.Range(0, 4);
-        
-        // This switch block will initialize m_Direction with
-        // a direction according to the randomDirection passed
-        // as parameter
-        switch(randomDirection)
+        if(randomDirection == 0)
         {
-            case 0:
-                m_Direction.x = 1;
-                m_Direction.y = 1;
-                break;
-            case 1:
-                m_Direction.x = 1;
-                m_Direction.y = -1;
-                break;
-            case 2:
-                m_Direction.x = -1;
-                m_Direction.y = -1;
-                break;
-            case 3:
-                m_Direction.x = -1;
-                m_Direction.y = 1;
-                break;
+            m_Direction.x = 1;
+            m_Direction.y = 1;
         }
-        transform.position = Vector3.zero;
+        else
+        {
+            m_Direction.x = -1;
+            m_Direction.y = 1;
+        }
+        transform.position = initialPosition;
     }
 
     void Update()
@@ -72,13 +72,20 @@ public class BallController : MonoBehaviour
 
         if(transform.position.y < bottomScreenLimit)
         {
-            ChooseBallDirection();
+            ResetBallPosition();
         }
     }
 
     private void OnCollisionEnter2D(Collision2D other) {
+        // One way of comparison is using the name
+        // A more efficient way:
+        // name.CompareTo("Player") == 0
         if(other.gameObject.name == "Player") 
         {
+            m_Direction.y *= -1;
+        }
+        else if (other.gameObject.CompareTag("Brick")) {
+            Destroy(other.gameObject);
             m_Direction.y *= -1;
         }
     }
