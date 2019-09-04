@@ -69,7 +69,7 @@
 }
 
 \begin{document}
-\title{Programação Básica em C\# para Unity}   
+\title{Programação Básica em C\# para Unity - MonoBehaviours}   
 \author{Bruno dos Santos de Araújo, MSc} 
 \date{\today} 
 
@@ -184,31 +184,140 @@ public class NewBehaviourScript : MonoBehaviour
 
 \begin{frame}[fragile]{Estrutura de um MonoBehaviour}
 	\begin{itemize}
-		\item \verb|Start()|: esta função é chamada assim que o GameObject é ativado em uma cena;
+		\item \verb|Start()|: esta função é chamada uma vez assim que o script é ativado pela primeira vez, sempre antes da primeira chamada a \verb|Update()|.
 		\begin{itemize}
 			\item Normalmente utilizada para inicializar quaisquer variáveis e chamar funções de inicialização.
+			\item Devido a ser executado só na ativação do script, pode ser utilizada para atrasar a inicialização para o momento que seja mais conveniente.
 		\end{itemize}
-		\item \verb|Update()|: esta função é chamada a cada quadro, e é utilizada para atualizar o estado interno do componente. 
+	\end{itemize}
+	\begin{lstlisting}
+private void Start()
+{
+	maxHp = 10;
+	transform.position = GetInitialPosition();		
+}
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Estrutura de um MonoBehaviour}
+	\begin{itemize}
+		\item \verb|Update()|: esta função é chamada a cada quadro quando o script está ativado, e é utilizada para atualizar o estado interno do componente. 
 		\begin{itemize}
 			\item No caso de ser um objeto controlável pelo jogador, também é onde se leem as entradas (teclas, botões, etc);
 			\item O tempo entre chamadas é aproximadamente o mesmo e pode variar de acordo com a quantidade de objetos na cena.
 		\end{itemize}
 	\end{itemize}
+	\begin{lstlisting}
+private void Update()
+{
+	// Update position at each frame
+	transform.position += velocity * Time.deltaTime;
+}
+\end{lstlisting}
+\begin{itemize}
+	\item Outras funções comumente utilizadas seguem nos próximos slides.
+\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{Estrutura de um MonoBehaviour}
 	\begin{itemize}
-		\item Outras funções comumente utilizadas:
+		\item \verb|Awake()|: é chamada uma única vez no ato da criação do GameObject, sempre antes de \verb|Start()|;
 		\begin{itemize}
-			\item Awake(): é chamada no ato da criação do GameObject, sempre antes de Start(), independentemente do GameObject estar ativado ou não;
-			\item FixedUpdate(): semelhante a Update() mas é chamada em tempos fixos a cada passo da Física, que por padrão é 20ms;
-			\begin{itemize}
-				\item Utilizada principalmente quando se utilizam funções que agem na física do GameObject.
-			\end{itemize}
-			\item OnEnable() e OnDisable(): chamadas na ativação e desativação do GameObject, respectivamente;
+			\item Normalmente utilizada para obter referências a componentes locais do GameObject e para instruções que precisam ser executadas sempre antes de \verb|Start()|.
+			\item Se o objeto não estiver ativado na inicialização da cena, será chamada na primeira vez que o objeto for ativado.
+			\item Se o objeto estiver ativo mas não o script, \verb|Awake()| será chamada.
+		\end{itemize}
+
+	\end{itemize}
+	\begin{lstlisting}
+private void Awake()
+{
+	rigidBody = GetComponent<Rigidbody>();
+	animator = GetComponent<Animator>();
+}
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Estrutura de um MonoBehaviour}
+	\begin{itemize}
+		\item \verb|FixedUpdate()|: semelhante a \verb|Update()| mas é chamada em tempos fixos a cada passo da Física, que por padrão é 20ms;
+		\begin{itemize}
+			\item Utilizada principalmente quando se utilizam funções que agem na física do GameObject.
 		\end{itemize}
 	\end{itemize}
+	\begin{lstlisting}
+private void FixedUpdate()
+{
+	if(Input.GetKey(KeyCode.RightArrow))
+	{
+		rigidbody.AddForce(Vector3.right * forceAmount);
+	}
+}
+	\end{lstlisting}
 \end{frame}
+
+
+\begin{frame}[fragile]{Estrutura de um MonoBehaviour}
+	\begin{itemize}
+		\item \verb|OnEnable()| e \verb|OnDisable()|: chamadas na ativação e desativação do GameObject, respectivamente;
+		\item Permitem separar a inicialização de maneira mais granular, e também executar algum código na desativação do objeto.
+	\end{itemize}
+	
+	\begin{lstlisting}
+// assume the game has a minimap showing the enemies
+private void OnEnable()
+{
+	AddToMinimap();
+}
+
+private void OnDisable()
+{
+	RemoveFromMinimap();
+}
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Estrutura de um MonoBehaviour}
+	\begin{itemize}
+		\item \verb|OnDestroy()|: chamada quando o objeto é destruído, seja quando a cena é descarregada ou usando \verb|Destroy()| diretamente.
+		\begin{itemize}
+			\item Menos comumente utilizada, mas útil pra quaisquer tarefas de limpeza quando o objeto é destruído.
+		\end{itemize}
+	\end{itemize}
+	\begin{lstlisting}
+private void Destroy()
+{
+	RemoveFromEnemyList();
+}
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Exemplo da ordem de execução dos scripts}
+	
+\begin{columns}
+\column{0.5\textwidth}
+\begin{lstlisting}
+private void Awake() {
+	Debug.Log("Awake()");
+}
+
+private void Start() {
+	Debug.Log("Start()");
+}
+
+private void OnEnable() {
+	Debug.Log("OnEnable()");
+}
+\end{lstlisting}
+
+\column{0.5\textwidth}
+\includegraphics{executionorder.png}
+\end{columns}
+	
+\end{frame}
+
 
 \end{document}
 
