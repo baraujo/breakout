@@ -10,9 +10,22 @@ public class PlayerController : MonoBehaviour
     public float leftScreenLimit;
     // How far the player can move to the right
     public float rightScreenLimit;
+    // Is the game running at the moment?
+    [HideInInspector]
+    public bool isGameRunning;
+
+    private void Start() 
+    {
+        isGameRunning = false;    
+    }
 
     void Update()
     {
+        if (!isGameRunning)
+        {
+            return;
+        }
+
         // Verify if the left arrow is being pressed
         if(Input.GetKey(KeyCode.LeftArrow))
         {

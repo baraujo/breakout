@@ -14,9 +14,12 @@ public class BallController : MonoBehaviour
     public float bottomScreenLimit;
     public float leftScreenLimit;
     public float rightScreenLimit;
-
     public Vector3 initialPosition;
-    
+    public int destroyedBricks;
+
+    [HideInInspector]
+    public bool isGameRunning;
+
     // Option 2: struct
     /* [System.Serializable]
     public struct ScreenLimits 
@@ -35,9 +38,11 @@ public class BallController : MonoBehaviour
         // Choose the initial ball direction
         Debug.Log("starting");
         ResetBallPosition();
+        isGameRunning = false;
+        destroyedBricks = 0;
     }
 
-    private void ResetBallPosition()
+    public void ResetBallPosition()
     {
         int randomDirection = Random.Range(0, 2);
         
@@ -56,6 +61,11 @@ public class BallController : MonoBehaviour
 
     void Update()
     {
+        if (!isGameRunning)
+        {
+            return;
+        }
+
         Vector3 newPosition = transform.position;
         newPosition += m_Direction * speed * Time.deltaTime;
         transform.position = newPosition;
@@ -68,11 +78,6 @@ public class BallController : MonoBehaviour
         if(transform.position.x < leftScreenLimit || transform.position.x > rightScreenLimit)
         {
             m_Direction.x *= -1;
-        }
-
-        if(transform.position.y < bottomScreenLimit)
-        {
-            ResetBallPosition();
         }
     }
 
@@ -87,6 +92,7 @@ public class BallController : MonoBehaviour
         else if (other.gameObject.CompareTag("Brick")) {
             Destroy(other.gameObject);
             m_Direction.y *= -1;
+            destroyedBricks++;
         }
     }
 }
